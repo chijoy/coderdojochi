@@ -23,6 +23,7 @@ class SendReminders(CronJobBase):
     code = 'coderdojochi.send_reminders'
 
     def do(self):
+        
         orders_within_a_week = Order.objects.filter(
             is_active=True,
             week_reminder_sent=False,
@@ -264,3 +265,60 @@ class SendReminders(CronJobBase):
 
         # Cleanup
         connection.close()
+
+class SendDayBeforeReminders(CronJobBase):
+    # RUN_AT_TIMES = ['15:00']
+    RUN_EVERY_MINS = 1
+    RETRY_AFTER_FAILURE_MINS = 2
+
+    # schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS, retry_after_failure_mins=RETRY_AFTER_FAILURE_MINS)
+    code = 'coderdojochi.send_reminders'
+
+    def do(self):
+        # session table, the session/coding class is active and the mentors haven't received the day before email
+        sessions_within_a_day = Session.objects.filter(
+            is_active=True,
+            mentors_day_reminder_sent=False
+            class_date = Order.session.start_date
+            day_before = class_date - datetime.timedelta(days=1),
+            )
+
+        # uses SMTP server specified in settings.py
+        connection = get_connection()
+
+        # If you don't open the connection manually,
+        # Django will automatically open, then tear down the connection
+        # in msg.send()
+        connection.open()
+
+        # this session was defined above and now defines orders for mentors
+        for session in sessions_within_a_day:  # looping through the sessions
+            # so now it's finding a session that belongs to a MentorOrder
+            orders = MentorOrder.objects.filter(session=session)
+
+        #mentor email
+        # now looping through those orders and looking for start_date
+        for order in orders:
+            
+
+            # if it's less than a day away, mentor email will be sent
+            if (timezone.now() < day_before)
+                email(
+                    subject='Your CoderDojoChi class is tomorrow!',
+                    template_name='class-reminder-mentor-workday-before'
+                    context={
+                            'first_name': order.mentor.user.first_name,
+                            },
+                    recipients=[order.mentor.user.email],
+                    preheader='The class is just a few hours away!',
+                    )
+
+
+        # changing so that it won't be sent again
+        session.mentors_day_reminder_sent = True
+        session.save()
+
+        # Cleanup
+        connection.close()
+

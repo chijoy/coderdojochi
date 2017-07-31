@@ -93,6 +93,10 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
+CRON_CLASSES = [
+    'my_app.cron.SendDayBeforeReminders'
+    ]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -536,8 +536,8 @@ class OrderAdmin(ImportExportMixin, ImportExportActionModelAdmin):
         'is_checked_in',
         # 'updated_at',
         'is_active',
-        # 'week_reminder_sent',
-        # 'day_reminder_sent',
+        'week_reminder_sent',
+        'day_reminder_sent',
     )
 
     list_filter = (
@@ -546,6 +546,8 @@ class OrderAdmin(ImportExportMixin, ImportExportActionModelAdmin):
         # 'guardian',
         'student',
         'session',
+        'week_reminder_sent',
+        'day_reminder_sent',
     )
 
     ordering = (
