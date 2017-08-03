@@ -17,9 +17,16 @@ from coderdojochi.util import email
 
 
 class SendReminders(CronJobBase):
-    RUN_AT_TIMES = ['10:00', '14:00']
+    # RUN_AT_TIMES = ['10:00', '14:00']
 
-    schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    # schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    # code = 'coderdojochi.send_reminders'
+
+    RUN_EVERY_MINS = 1
+    RETRY_AFTER_FAILURE_MINS = 2
+
+    # schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS, retry_after_failure_mins=RETRY_AFTER_FAILURE_MINS)
     code = 'coderdojochi.send_reminders'
 
     def do(self):
@@ -55,7 +62,7 @@ class SendReminders(CronJobBase):
             mentors_day_reminder_sent=False,
             start_date__lte=timezone.now() + datetime.timedelta(days=1),
             start_date__gte=timezone.now() - datetime.timedelta(days=2)
-        )
+        )   
 
         # uses SMTP server specified in settings.py
         connection = get_connection()
@@ -282,7 +289,7 @@ class SendDayBeforeReminders(CronJobBase):
             mentors_day_reminder_sent=False
             class_date = Order.session.start_date
             day_before = class_date - datetime.timedelta(days=1),
-            )
+        )
 
         # uses SMTP server specified in settings.py
         connection = get_connection()
@@ -301,7 +308,6 @@ class SendDayBeforeReminders(CronJobBase):
         # now looping through those orders and looking for start_date
         for order in orders:
             
-
             # if it's less than a day away, mentor email will be sent
             if (timezone.now() < day_before)
                 email(
@@ -309,16 +315,15 @@ class SendDayBeforeReminders(CronJobBase):
                     template_name='class-reminder-mentor-workday-before'
                     context={
                             'first_name': order.mentor.user.first_name,
-                            },
+                    },
                     recipients=[order.mentor.user.email],
                     preheader='The class is just a few hours away!',
-                    )
+                )
 
 
-        # changing so that it won't be sent again
-        session.mentors_day_reminder_sent = True
-        session.save()
+            # changing so that it won't be sent again
+            session.mentors_day_reminder_sent = True
+            session.save()
 
         # Cleanup
         connection.close()
-
